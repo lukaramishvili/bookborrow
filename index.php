@@ -141,7 +141,13 @@
                   <div id="jfmfs-container"></div>
               </div>
 	      <div id='toolbox-div'>
-		    date from-to
+		    <label for="from">თხოვების თარიღი</label>
+		    <br>
+		    <input type="text" id="from" name="from" />
+		    <br>
+		    <label for="to">გამორთმევის თარიღი</label>
+		    <br>
+		    <input type="text" id="to" name="to" />
 		    <br>
 		    <button type='button' id='btn-save'>დამახსოვრება</button>
 	      </div>
@@ -151,6 +157,7 @@
 	      </div>
 		    
 	      <script type='text/javascript'>
+		    $("#from,#to").datepicker();
 		    $('#book').change(function(){
 			$(this).val() == "manual" ? $("#book-manual").show() : $("#book-manual").hide();
 		    }).change();
