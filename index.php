@@ -1,3 +1,15 @@
+<?
+   include "fb_config.php";
+   
+   include_once("facebook-php-sdk/src/facebook.php");
+   $facebook = new Facebook(array(
+		'appId'  => $config['app_id'],
+		'secret' => $config['app_secret'],
+		'cookie' => true,
+   ));
+
+   $localhost = "localhost" == $_SERVER["HTTP_HOST"];
+?>
 <!Doctype html>
 <html>
     <head>
@@ -5,7 +17,10 @@
         <script type="text/javascript" src="jquery.facebook.multifriend.select.js"></script>
         <link rel="stylesheet" href="jquery.facebook.multifriend.select-list.css" />
         <style>
-            body {
+	  /*html { overflow:hidden; }
+	  body { overflow:hidden; }
+	  */
+          body {
                 background: #fff;
                 color: #333;
                 font: 11px verdana, arial, helvetica, sans-serif;
@@ -24,21 +39,41 @@
             <div id="fb-root"></div>
             <script src="https://connect.facebook.net/en_US/all.js"></script>
             <script>
-                FB.init({appId: '189768081229835', cookie: true});
+                FB.init({appId: '<?=$config['app_id']?>',
+		         status: true,
+		         cookie: true});
+
+		// Additional initialization code here 
+		FB.Canvas.setAutoGrow();
 
                 FB.getLoginStatus(function(response) {
-                    if (response.session) {
-                      init();
+                    if (response.status === 'connected') {
+          // the user is logged in and has authenticated your 
+          // app, and response.authResponse supplies 
+          // the user's ID, a valid access token, a signed 
+          // request, and the time the access token 
+          // and signed request each expire 
+		        var uid = response.authResponse.userID;
+		        var accessToken = response.authResponse.accessToken;
+                        init();
+		} else if (response.status === 'not_authorized') {
+          // the user is logged in to Facebook, 
+          // but has not authenticated your app 
+          top.window.location = "https://www.facebook.com/dialog/oauth/?client_id=<?=$config['app_id']?>"
+			+ "&redirect_uri=<?=$config['app_dir_https']?>/auth.php"
+			+ "&state=<?=uniqid()?>&scope=<?=$config['permissions']?>";
                     } else {
-                      // no user session available, someone you dont know
+          // the user isn't logged in to Facebook.
+		        
                     }
                 });
 
 
                 function login() {
                     FB.login(function(response) {
-                        if (true || response.session) {
+                        if (response.status === 'connected') {
                             init();
+		        } else if (response.status === 'not_authorized') {
                         } else {
                             alert('Login Failed!');
                         }
