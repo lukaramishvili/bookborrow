@@ -41,7 +41,7 @@ if(isset($_GET["code"]) && isset($_GET["state"])){
 		$last_name = $my_info->last_name;
 		$profile_url = $my_info->link;
 		$username = $my_info->username;
-		$birthday = $my_info->birthday;
+		//$birthday = $my_info->birthday;
 		///////$since_born = date_diff(new DateTime(NULL), new DateTime($my_info->birthday), true);
 		$age = 0;//$since_born->y;
 		$gender = $my_info->gender;
@@ -59,18 +59,10 @@ if(isset($_GET["code"]) && isset($_GET["state"])){
 		}*/
 		$prof_pic_url = "https://graph.facebook.com/$fb_id/picture";
 		//end getting profile picture url
-		$q_user_already_in_db = mysql_query("SELECT * FROM `weekly_users` WHERE `fb_id` = '$fb_id';");
-		$user_already_in_db = mysql_num_rows($q_user_already_in_db) > 0;
-		if($user_already_in_db){
-			mysql_query("UPDATE `weekly_users` SET `full_name` = '$full_name',`first_name` = '$first_name',`last_name` = '$last_name',`profile_url` = '$profile_url',`username` = '$username',`birthday` = '$birthday',`age` = '$age',`gender` = '$gender',`email` = '$email',`hometown` = '$hometown',`prof_pic_url` = '$prof_pic_url' "
-						." WHERE `fb_id` = '$fb_id';");
-		}
-		else {
-			mysql_query("INSERT INTO `weekly_users`(`fb_id`,`full_name`,`first_name`,`last_name`,`profile_url`,`username`,`birthday`,`age`,`gender`,`email`,`hometown`,`prof_pic_url`) "
-						 ." VALUES('$fb_id','$full_name','$first_name','$last_name','$profile_url','$username','$birthday','$age','$gender','$email','$hometown','$prof_pic_url');");
-		}
-		//header("Location: ".$config['app_dir_https']."/?page=gallery&type=".$userdata["smoking"]);
-		header($redir_location); 
+		$my_books_res = $facebook->api('/me/books');
+		$my_books = (object)$my_books_res;
+		var_dump($my_books);
+		//header($redir_location);
 	} catch(Exception $e){
 		//die("Facebook has a problem. Please try again later.");
 		//TODO: somehow curl doesnt work properly, use another method to authenticate
