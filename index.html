@@ -62,6 +62,7 @@
                 });
 
 		$("#btn-load-books").click(function(){
+		    //you need usr_actions.books permission
 		    FB.api('/me/book.reads', function(response){
 		        console.log(response);
 		    });
