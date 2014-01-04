@@ -58,13 +58,13 @@
 
                 $("#show-friends").live("click", function() {
                     var friendSelector = $("#jfmfs-container").data('jfmfs');             
-                    $("#selected-friends").html(friendSelector.getSelectedIds().join(', ')); 
+                    $("#selected-friends").html(friendSelector.getSelectedIds().join(', ')); alert(4);console.log("dafuq");
                 });
-
-		$("#btn-load-books").click(function(){
+alert($("#btn-load-books").length);console.log("dafuq");
+		$("#btn-load-books").live("click", function(){alert(5);
 		    //you need usr_actions.books permission
 		    FB.api('/me/book.reads', function(response){
-		        console.log(response);
+		        alert(response.toString());
 		    });
 		});
 
