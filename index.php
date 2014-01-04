@@ -1,4 +1,5 @@
 <?
+   include "lib.php";
    include "fb_config.php";
    
    include_once("facebook-php-sdk/src/facebook.php");
@@ -93,31 +94,117 @@
 
                 $("#show-friends").live("click", function() {
                     var friendSelector = $("#jfmfs-container").data('jfmfs');             
-                    $("#selected-friends").html(friendSelector.getSelectedIds().join(', ')); alert(4);console.log("dafuq");
+                    $("#selected-friends").html(friendSelector.getSelectedIds().join(', '));
                 });
-alert($("#btn-load-books").length);console.log("dafuq");
-		$("#btn-load-books").live("click", function(){alert(5);
+
+		/*$("#btn-load-books").live("click", function(){
 		    //you need usr_actions.books permission
 		    FB.api('/me/book.reads', function(response){
 		        alert(response.toString());
 		    });
-		});
+		});*/
 
               </script>
+	      
+	      <div id="app-description" style="margin-bottom:20px;">
+		  წიგნის გასათხოვებლად წიგნი ან ფეისბუქის პროფილში უნდა გქონდეთ Read-ში მონიშნული, ან ხელით შეიყვანოთ წიგნის სახელი.
+		  <br>
+		  აირჩიეთ წიგნი, აირჩიეთ მეგობარი, რომელსაც ათხოვეთ წიგნი, და დააჭირეთ დამახსოვრების ღილაკს.
+		  <br>
+	      </div>
               
               <div id="logged-out-status" style="">
                   <a href="javascript:login()">Login</a>
               </div>
 
-              <div>
+	      <div id="books-div" class="only-authed" style="width:250px; float:left; margin-right:16px;">
+		<!--<button id="btn-load-books">Load books</button>-->
+                  <select id='book' name='book' multiple='multiple' style='height:400px;'>
+		  <option value='manual'>წიგნის სახელის ხელით აკრეფა</option>
+		  <?
+		  $my_books_res = $facebook->api('/me/book.reads');
+                  $my_books = (object)$my_books_res;
+                  foreach($my_books->data as $b){
+		    $book = get_book($b['data']['book']['id']);
+		    //$book['description'], ['name'], ['link'], ['likes']
+		    echo "<option value='".$book['id']."'>".$book['name']."</option>";
+		  }
+		  ?>
+		  </select>
+		  <br>
+		  <input type='text' id='book-manual' name='book-manual' style='display:none;' />
+	      </div>
+              <div id="friends-div" style="width:250px; float:left; padding-bottom:100px;">
                   <div id="username"></div>
                   <a href="#" id="show-friends" style="display:none;">Show Selected Friends</a>
                   <div id="selected-friends" style="height:30px"></div>
                   <div id="jfmfs-container"></div>
               </div>
-	      <div id="books-div" class="only-authed">
-		<button id="btn-load-books">Load books</button>
+	      <div id='toolbox-div'>
+		    date from-to
+		    <br>
+		    <button type='button' id='btn-save'>დამახსოვრება</button>
 	      </div>
+	      
+	      <div class="text" id="bottom-description" style="clear:both; margin:20px 0px;">
+		  ქვემოთ მოცემულია თქვენს მიერ უკვე გათხოვებული წიგნების სია.
+	      </div>
+		    
+	      <script type='text/javascript'>
+		    $('#book').change(function(){
+			$(this).val() == "manual" ? $("#book-manual").show() : $("#book-manual").hide();
+		    }).change();
+
+                    function save_book(args){
+		      var ret = { code : 501, message : "nothing happened" };
+		      var id = args.id;
+		      var friend_id = args.friend_id;
+		      var book_id = args.book_id;
+		      var book_name = args.book_name;
+		      var from = args.from || Date.now();
+		      var to = args.to || Date.now();
+		      if(id && friend_id && book_id && book_name){
+			  $.ajax({
+			    url: "save.php",
+				type: "POST",
+				cache: false,
+				data: { id : id, friend_id : friend_id, book_id : book_id,
+				  book_name : book_name, from : from, to : to },
+				dataType: "json",
+				success: function(data){
+				    ret = { code : 0, message : data.message };
+			        }
+			    });
+		      } else {
+			ret = { code : 1, message : "invalid parameters" };
+		      }
+		      return ret;
+                    }
+                    
+		    $("#btn-save").click(function(){
+			var friend_ids = friendSelector.getSelectedIds();
+			var book_id = $("#book").val();
+			var book_manual = $("#book-manual").val();
+			var book_name = "";
+			var from = $("#from").val();
+			var to = $("#to").val();
+			if(/^\d+$/gi.test(book_id)){
+			  book_name = $("#book option[value='"+book_id+"']").text();
+			}
+			else if(book_id == 'manual' && !/^\s*$/gi.test(book_manual)){
+			  book_name = book_manual;
+			}
+			if(friend_ids.length > 0 && !/^\s*$/gi.test(book_name)){
+			  var friend_id = friend_ids[0];
+			  var sav = save_book({ id : 0, friend_id : friend_id, book_id : book_id,
+				book_name : book_name, from : from, to : to });
+			  alert(sav.message);
+			  
+			} else {
+			  alert("წიგნიც, მეგობარიც და თარიღიც აუცილებლად უნდა შეავსოთ :)");
+			}
+                    });
+	      </script>
         </div>
     </body>
 </html>

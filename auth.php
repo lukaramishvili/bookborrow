@@ -1,6 +1,7 @@
 <?php
 session_start();
-include "fb_config.php";
+include_once "lib.php";
+include_once "fb_config.php";
 
 include_once("facebook-php-sdk/src/facebook.php");
 $facebook = new Facebook(array(
@@ -9,7 +10,7 @@ $facebook = new Facebook(array(
 		'cookie' => true,
 ));
 
-$redir_location = "Location: https://www.facebook.com/pages/".$config['page_id']."?id=".$config['page_id']."&sk=app_156691764502878";
+$redir_location = "Location: https://www.facebook.com/pages/@/".$config['page_id']."?id=".$config['page_id']."&sk=app_156691764502878";
 
 if(isset($_GET["code"]) && isset($_GET["state"])){
 	$code = str_replace("#_=_", "", $_GET["code"]);
@@ -59,10 +60,7 @@ if(isset($_GET["code"]) && isset($_GET["state"])){
 		}*/
 		$prof_pic_url = "https://graph.facebook.com/$fb_id/picture";
 		//end getting profile picture url
-		$my_books_res = $facebook->api('/me/books');
-		$my_books = (object)$my_books_res;
-		var_dump($my_books);
-		//header($redir_location);
+		header($redir_location);
 	} catch(Exception $e){
 		//die("Facebook has a problem. Please try again later.");
 		//TODO: somehow curl doesnt work properly, use another method to authenticate
