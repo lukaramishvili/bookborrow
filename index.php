@@ -14,7 +14,10 @@
 <!Doctype html>
 <html>
     <head>
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.8.22.custom.min.js"></script>
+	<link rel="stylesheet" href="css/south-street/jquery-ui-1.8.22.custom.css" />
+	
         <script type="text/javascript" src="jquery.facebook.multifriend.select.js"></script>
         <link rel="stylesheet" href="jquery.facebook.multifriend.select-list.css" />
         <style>
