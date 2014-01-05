@@ -1,5 +1,6 @@
 <?
    include "lib.php";
+   include "config.php";
    include "fb_config.php";
    
    include_once("facebook-php-sdk/src/facebook.php");
@@ -10,6 +11,10 @@
    ));
 
    $localhost = "localhost" == $_SERVER["HTTP_HOST"];
+
+   $me_res = $facebook->api('/me');
+   $me = (object)$me_res;
+
 ?>
 <!Doctype html>
 <html>
@@ -157,10 +162,36 @@
 	      
 	      <div class="text" id="bottom-description" style="clear:both; margin:20px 0px;">
 		  ქვემოთ მოცემულია თქვენს მიერ უკვე გათხოვებული წიგნების სია.
+		  <br>
+		  <table border='0' width='100%'>
+		    <thead>
+		      <tr>მეგობარი</tr>
+		      <tr>წიგნი</tr>
+		      <tr>თხოვების თარიღი</tr>
+		      <tr>გამორთმევის თარიღი</tr>
+		    </thead>
+		    <tbody>
+		      <?
+		          $q_borrows = mysql_query("select * from borrows where user_id = '".$me->id."';");
+                          while($r_borrow = mysql_fetch_assoc($q_borrows)){
+			    $rfriend_name = $r_borrow["friend_name"];
+			    $rbook_name = $r_borrow["book_name"];
+			    $from = $r_borrow["from"];
+			    $rto = $r_borrow["to"];
+			    ?>
+			    <tr><?=$rfriend_name?></tr>
+			    <tr><?=$rbook_name?></tr>
+			    <tr><?=$rfrom?></tr>
+			    <tr><?=$rto?></tr>
+			    <?
+                          }
+		      ?>
+		    </tbody>
+		  </table>
 	      </div>
 		    
 	      <script type='text/javascript'>
-		    $("#from,#to").datepicker();
+		    $("#from,#to").datepicker({ dateFormat : "@" });
 		    $('#book').change(function(){
 			$(this).val() == "manual" ? $("#book-manual").show() : $("#book-manual").hide();
 		    }).change();
@@ -171,19 +202,22 @@
 		      var friend_id = args.friend_id;
 		      var book_id = args.book_id;
 		      var book_name = args.book_name;
-		      var from = args.from || Date.now();
-		      var to = args.to || Date.now();
-		      if(id && friend_id && book_id && book_name){
+		      var from = args.from || 0;//Date.now();
+		      var to = args.to || 0;//Date.now();
+		      if(id != undefined && friend_id && book_id && book_name){
 			  $.ajax({
 			    url: "save.php",
-				type: "POST",
-				cache: false,
-				data: { id : id, friend_id : friend_id, book_id : book_id,
+			    type: "POST",
+			    cache: false,
+			    data: { id : id, friend_id : friend_id, book_id : book_id,
 				  book_name : book_name, from : from, to : to },
-				dataType: "json",
-				success: function(data){
-				    ret = { code : 0, message : data.message };
-			        }
+			    dataType: "json",
+			    success: function(data){
+				ret = { code : 0, message : data.message };
+			    },
+			    error: function(data){
+				ret = { code : 2, message : data.statusText };
+			      }
 			    });
 		      } else {
 			ret = { code : 1, message : "invalid parameters" };
@@ -192,6 +226,7 @@
                     }
                     
 		    $("#btn-save").click(function(){
+			var friendSelector = $("#jfmfs-container").data('jfmfs');
 			var friend_ids = friendSelector.getSelectedIds();
 			var book_id = $("#book").val();
 			var book_manual = $("#book-manual").val();
