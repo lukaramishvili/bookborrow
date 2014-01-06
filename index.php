@@ -25,7 +25,7 @@
 	
         <script type="text/javascript" src="jquery.facebook.multifriend.select.js"></script>
         <link rel="stylesheet" href="jquery.facebook.multifriend.select-list.css" />
-        <style>
+        <style type="text/css">
 	  /*html { overflow:hidden; }
 	  body { overflow:hidden; }
 	  */
@@ -40,6 +40,7 @@
                 text-decoration: none;
             }
 	    .only-authed { display:none; }
+            thead th { text-align:left; }
         </style>
     </head>
     <body>
@@ -127,7 +128,8 @@
 
 	      <div id="books-div" class="only-authed" style="width:250px; float:left; margin-right:16px;">
 		<!--<button id="btn-load-books">Load books</button>-->
-                  <select id='book' name='book' multiple='multiple' style='height:400px;'>
+                  <select id='book' name='book' size="22">
+		  <!--style='height:400px;'-->
 		  <option value='manual'>წიგნის სახელის ხელით აკრეფა</option>
 		  <?
 		  $my_books_res = $facebook->api('/me/book.reads');
@@ -163,26 +165,37 @@
 	      <div class="text" id="bottom-description" style="clear:both; margin:20px 0px;">
 		  ქვემოთ მოცემულია თქვენს მიერ უკვე გათხოვებული წიგნების სია.
 		  <br>
+		  <br>
 		  <table border='0' width='100%'>
 		    <thead>
-		      <tr>მეგობარი</tr>
-		      <tr>წიგნი</tr>
-		      <tr>თხოვების თარიღი</tr>
-		      <tr>გამორთმევის თარიღი</tr>
+		      <tr>
+		      <th>მეგობარი</th>
+		      <th>წიგნი</th>
+		      <th>თხოვების თარიღი</th>
+		      <th>გამორთმევის თარიღი</th>
+		      </tr>
 		    </thead>
 		    <tbody>
 		      <?
 		          $q_borrows = mysql_query("select * from borrows where user_id = '".$me->id."';");
                           while($r_borrow = mysql_fetch_assoc($q_borrows)){
+			    $rfriend_id = $r_borrow["friend_id"];
 			    $rfriend_name = $r_borrow["friend_name"];
+			    if($rfriend_name == ""){
+			      $api_fr = $facebook->api("/".$rfriend_id);
+			      $rfriend_name = $api_fr["name"];
+			    }
 			    $rbook_name = $r_borrow["book_name"];
-			    $from = $r_borrow["from"];
+			    $rfrom = $r_borrow["from"];
 			    $rto = $r_borrow["to"];
 			    ?>
-			    <tr><?=$rfriend_name?></tr>
-			    <tr><?=$rbook_name?></tr>
-			    <tr><?=$rfrom?></tr>
-			    <tr><?=$rto?></tr>
+			    <tr>
+			       <td><?=$rfriend_name?></td>
+			       <td><?=$rbook_name?></td>
+			       <? //the time is given in UTC so let javascript convert it based on browser timezone ?>
+			       <td><span class='convert-time'><?=$rfrom*1000?></span><?//=date("j/m/Y", $rfrom)?></td>
+			       <td><span class='convert-time'><?=$rto*1000?></span><?//=date("j/m/Y", $rto)?></td>
+			    </tr>
 			    <?
                           }
 		      ?>
@@ -209,8 +222,8 @@
 			    url: "save.php",
 			    type: "POST",
 			    cache: false,
-			    data: { id : id, friend_id : friend_id, book_id : book_id,
-				  book_name : book_name, from : from, to : to },
+			    data: { id : id, user_id : '<?=$me->id?>', friend_id : friend_id,
+				  book_id : book_id, book_name : book_name, from : from, to : to },
 			    dataType: "json",
 			    success: function(data){
 				ret = { code : 0, message : data.message };
@@ -248,6 +261,12 @@
 			} else {
 			  alert("წიგნიც, მეგობარიც და თარიღიც აუცილებლად უნდა შეავსოთ :)");
 			}
+                    });
+
+                    //the time is given in UTC so let javascript convert it based on browser timezone
+                    $(".convert-time").each(function(i, el){
+			var d = new Date(parseInt($(this).text()));
+			$(this).html(d.getDate() + "/" + (d.getMonth()+1) + "/" + d.getFullYear());
                     });
 	      </script>
         </div>

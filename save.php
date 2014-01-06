@@ -2,14 +2,16 @@
 include "anti-injection.php";
 include "config.php";
 
-var $id = $_POST['id'];
-var $user_id = $_POST['user_id'];
-var $friend_id = $_POST['friend_id'];
-var $friend_name = $_POST['friend_name'];
-var $book_id = $_POST['book_id'];
-var $book_name = $_POST['book_name'];
-var $from = $_POST['from'];
-var $to = $_POST['to'];
+$id = $_POST['id'];
+$user_id = $_POST['user_id'];
+$friend_id = $_POST['friend_id'];
+$friend_name = $_POST['friend_name'];
+$book_id = $_POST['book_id'];
+$book_name = $_POST['book_name'];
+$from = $_POST['from'];
+$to = $_POST['to'];
+if(is_numeric($from)){ $from = $from / 1000; }
+if(is_numeric($to)){ $to = $to / 1000; }
 
 if($id > 0){
   //`user_id` = '$user_id',//makes no sense to update owner for existing borrow
