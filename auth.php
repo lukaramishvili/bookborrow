@@ -10,7 +10,9 @@ $facebook = new Facebook(array(
 		'cookie' => true,
 ));
 
-$redir_location = "Location: https://www.facebook.com/pages/@/".$config['page_id']."?id=".$config['page_id']."&sk=app_156691764502878";
+$redir_location = "Location: https://www.facebook.com/pages/@/".$config['page_id']."?id=".$config['page_id']."&sk=app_".$config['app_id'];
+
+$redir_location = "Location: https://www.facebook.com/borrowbooks/app_".$config['app_id'];
 
 if(isset($_GET["code"]) && isset($_GET["state"])){
 	$code = str_replace("#_=_", "", $_GET["code"]);

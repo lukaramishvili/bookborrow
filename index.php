@@ -2,7 +2,7 @@
    include "lib.php";
    include "config.php";
    include "fb_config.php";
-   
+
    include_once("facebook-php-sdk/src/facebook.php");
    $facebook = new Facebook(array(
 		'appId'  => $config['app_id'],
@@ -11,10 +11,12 @@
    ));
 
    $localhost = "localhost" == $_SERVER["HTTP_HOST"];
-
+try{
    $me_res = $facebook->api('/me');
    $me = (object)$me_res;
-
+}catch(Exception $e){
+  //not authed, so api call fails
+}
 ?>
 <!Doctype html>
 <html>
@@ -209,7 +211,7 @@
 			$(this).val() == "manual" ? $("#book-manual").show() : $("#book-manual").hide();
 		    }).change();
 
-                    function save_book(args){
+                    function save_book(args, callback){
 		      var ret = { code : 501, message : "nothing happened" };
 		      var id = args.id;
 		      var friend_id = args.friend_id;
@@ -226,7 +228,8 @@
 				  book_id : book_id, book_name : book_name, from : from, to : to },
 			    dataType: "json",
 			    success: function(data){
-				ret = { code : 0, message : data.message };
+				ret = { code : data.code, message : data.message };
+				callback.call(this, ret);
 			    },
 			    error: function(data){
 				ret = { code : 2, message : data.statusText };
@@ -254,10 +257,12 @@
 			}
 			if(friend_ids.length > 0 && !/^\s*$/gi.test(book_name)){
 			  var friend_id = friend_ids[0];
-			  var sav = save_book({ id : 0, friend_id : friend_id, book_id : book_id,
-				book_name : book_name, from : from, to : to });
-			  alert(sav.message);
-			  
+			  save_book({ id : 0, friend_id : friend_id, book_id : book_id,
+				book_name : book_name, from : from, to : to },
+			    function(result){
+			      console.log(result.message);
+			      window.location.href = window.location.href;
+			    });
 			} else {
 			  alert("წიგნიც, მეგობარიც და თარიღიც აუცილებლად უნდა შეავსოთ :)");
 			}
@@ -266,7 +271,11 @@
                     //the time is given in UTC so let javascript convert it based on browser timezone
                     $(".convert-time").each(function(i, el){
 			var d = new Date(parseInt($(this).text()));
-			$(this).html(d.getDate() + "/" + (d.getMonth()+1) + "/" + d.getFullYear());
+			if(d > 0){
+			  $(this).html(d.getDate() + "/" + (d.getMonth()+1) + "/" + d.getFullYear());
+			} else {
+			  $(this).html("არ არის მითითებული");
+			}
                     });
 	      </script>
         </div>

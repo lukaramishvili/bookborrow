@@ -32,4 +32,5 @@ WHERE `id` = '$id';
 VALUES
 ('$user_id','$friend_id','$friend_name','$book_id','$book_name','$from','$to');");
 }
+echo json_encode(array( code => 0, message => "დამახსოვრებულია" ));
 ?>
